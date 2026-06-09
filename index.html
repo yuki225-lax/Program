@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#10b981">
+<title>健康饮食管家</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%97%3C/text%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#10b981;--primary-dark:#059669;--primary-light:#d1fae5;--secondary:#3b82f6;--accent:#f59e0b;--danger:#ef4444;--bg:#f9fafb;--card:#ffffff;--text:#1f2937;--text-light:#6b7280;--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,0.1);--shadow-lg:0 10px 25px rgba(0,0,0,0.1)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+#root{min-height:100vh;max-width:480px;margin:0 auto;background:var(--bg);position:relative;box-shadow:0 0 20px rgba(0,0,0,0.05);min-height:100vh;padding-bottom:80px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:white;border-top:1px solid var(--border);z-index:100}
+.nav-tabs{display:flex}
+.nav-tab{flex:1;padding:12px;text-align:center;font-size:13px;color:var(--text-light);cursor:pointer;border:none;background:none;font-weight:500;transition:all 0.2s}
+.nav-tab.active{color:var(--primary);border-top:2px solid var(--primary);margin-top:-1px}
+.page{padding:16px 20px 20px}
+.page-title{font-size:24px;font-weight:700;margin-bottom:8px}
+.page-subtitle{color:var(--text-light);font-size:14px;margin-bottom:20px}
+.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:16px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:14px;font-weight:500;margin-bottom:6px;color:var(--text)}
+.form-input,.form-select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:var(--card);color:var(--text);transition:border 0.2s}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;gap:6px}
+.btn-primary{background:var(--primary);color:white;width:100%}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:var(--primary-light);color:var(--primary-dark)}
+.btn-secondary:hover{background:#a7f3d0}
+.btn-outline{background:white;color:var(--primary);border:1px solid var(--primary)}
+.btn-sm{padding:6px 12px;font-size:13px}
+.meal-section{margin-bottom:20px}
+.meal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.meal-title{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px}
+.meal-emoji{font-size:22px}
+.meal-calories{font-size:13px;color:var(--text-light);background:var(--primary-light);padding:4px 10px;border-radius:20px;color:var(--primary-dark);font-weight:600}
+.food-list{background:var(--card);border-radius:12px;overflow:hidden}
+.food-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.food-item:last-child{border-bottom:none}
+.food-name{font-size:15px;font-weight:500}
+.food-portion{font-size:12px;color:var(--text-light);margin-top:2px}
+.food-calories{font-size:14px;font-weight:600;color:var(--primary-dark)}
+.food-remove{background:none;border:none;color:var(--danger);cursor:pointer;padding:4px 8px;font-size:14px}
+.empty-meal{text-align:center;padding:24px;color:var(--text-light);font-size:14px;background:var(--card);border-radius:12px;border:2px dashed var(--border)}
+.progress{background:var(--border);height:8px;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-bar{height:100%;background:var(--primary);transition:width 0.3s}
+.progress-bar.warning{background:var(--accent)}
+.progress-bar.danger{background:var(--danger)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);padding:16px;border-radius:12px;text-align:center}
+.stat-value{font-size:24px;font-weight:700;color:var(--primary);margin:4px 0}
+.stat-label{font-size:12px;color:var(--text-light)}
+.recipe-card{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.2s}
+.recipe-card:hover{transform:translateY(-2px)}
+.recipe-image{width:100%;height:160px;object-fit:cover;background:var(--border)}
+.recipe-content{padding:16px}
+.recipe-name{font-size:18px;font-weight:600;margin-bottom:6px}
+.recipe-desc{font-size:13px;color:var(--text-light);margin-bottom:12px;line-height:1.5}
+.recipe-stats{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
+.recipe-stat{text-align:center}
+.recipe-stat-value{font-size:16px;font-weight:600;color:var(--primary)}
+.recipe-stat-label{font-size:11px;color:var(--text-light);margin-top:2px}
+.recipe-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:200}
+.modal{background:var(--card);width:100%;max-width:480px;max-height:80vh;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:18px;font-weight:600}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-light);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.food-picker{display:flex;flex-direction:column;gap:8px}
+.food-picker-item{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:10px;cursor:pointer;transition:background 0.2s}
+.food-picker-item:hover{background:var(--primary-light)}
+.food-picker-info{flex:1}
+.food-picker-name{font-weight:500;font-size:15px}
+.food-picker-cal{font-size:12px;color:var(--text-light);margin-top:2px}
+.preference-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.preference-item:last-child{border-bottom:none}
+.welcome{min-height:100vh;background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;text-align:center}
+.welcome-emoji{font-size:80px;margin-bottom:24px}
+.welcome-title{font-size:32px;font-weight:700;margin-bottom:16px}
+.welcome-desc{font-size:16px;opacity:0.95;line-height:1.6;margin-bottom:40px;max-width:320px}
+.welcome-features{display:flex;flex-direction:column;gap:12px;margin-bottom:40px;width:100%;max-width:320px}
+.welcome-feature{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);padding:14px 18px;border-radius:12px;backdrop-filter:blur(10px);text-align:left}
+.welcome-feature-icon{font-size:24px}
+.welcome-feature-text{font-size:14px;flex:1}
+.empty{text-align:center;padding:60px 20px;color:var(--text-light)}
+.empty-emoji{font-size:48px;margin-bottom:12px}
+.option-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
+.option{padding:10px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:14px;font-weight:500;background:var(--card);transition:all 0.2s}
+.option.active{background:var(--primary);color:white;border-color:var(--primary)}
+.option:hover:not(.active){border-color:var(--primary)}
+.ring-progress{position:relative;width:180px;height:180px;margin:0 auto}
+.ring-progress svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-progress-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-progress-value{font-size:32px;font-weight:700;color:var(--primary)}
+.ring-progress-label{font-size:12px;color:var(--text-light);margin-top:4px}
+.recipe-detail-image{width:100%;height:220px;object-fit:cover;border-radius:16px;margin-bottom:16px;background:var(--border)}
+.recipe-detail-section{margin-top:20px}
+.recipe-detail-section-title{font-size:16px;font-weight:600;margin-bottom:10px}
+.recipe-detail-list{background:var(--card);border-radius:12px;padding:12px 16px}
+.recipe-detail-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:8px}
+.recipe-detail-item:last-child{border-bottom:none}
+.recipe-detail-step{padding:10px 0;display:flex;gap:12px;border-bottom:1px solid var(--border)}
+.recipe-detail-step:last-child{border-bottom:none}
+.step-number{width:24px;height:24px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.search{position:relative;margin-bottom:12px}
+.search input{width:100%;padding:12px 14px 12px 40px;border:1px solid var(--border);border-radius:12px;font-size:14px;background:var(--card)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-light)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+'use strict';
+
+// ============ 状态管理 ============
+const STATE = {
+  profile: JSON.parse(localStorage.getItem('health-profile') || 'null') || {
+    height: 170, weight: 65, age: 25, gender: 'male',
+    activityLevel: 'moderate', goal: 'maintain'
+  },
+  isSetup: localStorage.getItem('health-is-setup') === 'true',
+  records: JSON.parse(localStorage.getItem('meal-records') || '[]'),
+  activeTab: 'profile',
+  isEditing: false,
+  editingProfile: null,
+  pickerOpen: null,
+  searchQuery: '',
+  selectedRecipe: null,
+  recipeTab: 'recommend',
+  recipeFilter: 'all'
+};
+
+function saveProfile() {
+  localStorage.setItem('health-profile', JSON.stringify(STATE.profile));
+}
+function saveSetup() {
+  localStorage.setItem('health-is-setup', 'true');
+}
+function saveRecords() {
+  localStorage.setItem('meal-records', JSON.stringify(STATE.records));
+}
+
+// ============ 计算函数 ============
+function calculateBMR(p) {
+  if (p.gender === 'male') {
+    return 10 * p.weight + 6.25 * p.height - 5 * p.age + 5;
+  } else {
+    return 10 * p.weight + 6.25 * p.height - 5 * p.age - 161;
+  }
+}
+const ACTIVITY = {
+  'sedentary': 1.2, 'light': 1.375, 'moderate': 1.55, 'active': 1.725, 'very-active': 1.9
+};
+function calculateTDEE(p) {
+  return Math.round(calculateBMR(p) * ACTIVITY[p.activityLevel]);
+}
+function calculateTargetCalories(p) {
+  const tdee = calculateTDEE(p);
+  if (p.goal === 'lose') return Math.round(tdee - 500);
+  if (p.goal === 'gain') return Math.round(tdee + 500);
+  return tdee;
+}
+
+function analyzePreference(records) {
+  if (!records.length) {
+    return { averageCalories: 0, mealDistribution: {breakfast:33,lunch:34,dinner:33}, frequentFoods: [] };
+  }
+  const foodCount = {};
+  const mealCount = {breakfast:0,lunch:0,dinner:0};
+  let totalCal = 0;
+  records.forEach(r => {
+    mealCount[r.mealType]++;
+    totalCal += r.totalCalories;
+    r.foods.forEach(f => { foodCount[f.name] = (foodCount[f.name]||0) + 1; });
+  });
+  const sortedFoods = Object.entries(foodCount)
+    .map(([name,count]) => ({name,count}))
+    .sort((a,b) => b.count - a.count)
+    .slice(0, 10);
+  const avg = records.length ? Math.round(totalCal / records.length) : 0;
+  const total = mealCount.breakfast + mealCount.lunch + mealCount.dinner;
+  const dist = total > 0 ? {
+    breakfast: Math.round(mealCount.breakfast/total*100),
+    lunch: Math.round(mealCount.lunch/total*100),
+    dinner: Math.round(mealCount.dinner/total*100)
+  } : {breakfast:33,lunch:34,dinner:33};
+  return { averageCalories: avg, mealDistribution: dist, frequentFoods: sortedFoods };
+}
+
+// ============ 数据 ============
+const FOOD_DATABASE = [
+  {id:'f1',name:'米饭',calories:116,category:'grain'},{id:'f2',name:'馒头',calories:223,category:'grain'},
+  {id:'f3',name:'全麦面包',calories:246,category:'grain'},{id:'f4',name:'燕麦',calories:389,category:'grain'},
+  {id:'f5',name:'紫薯',calories:86,category:'grain'},{id:'f6',name:'玉米',calories:86,category:'grain'},
+  {id:'f7',name:'意面',calories:131,category:'grain'},{id:'f8',name:'小米粥',calories:46,category:'grain'},
+  {id:'f10',name:'鸡胸肉',calories:165,category:'meat'},{id:'f11',name:'牛肉',calories:250,category:'meat'},
+  {id:'f12',name:'三文鱼',calories:208,category:'meat'},{id:'f13',name:'鸡蛋',calories:144,category:'meat'},
+  {id:'f14',name:'虾仁',calories:99,category:'meat'},{id:'f15',name:'猪里脊',calories:242,category:'meat'},
+  {id:'f16',name:'鸭胸肉',calories:132,category:'meat'},{id:'f17',name:'豆腐',calories:76,category:'meat'},
+  {id:'f20',name:'西兰花',calories:34,category:'vegetable'},{id:'f21',name:'菠菜',calories:23,category:'vegetable'},
+  {id:'f22',name:'胡萝卜',calories:41,category:'vegetable'},{id:'f23',name:'番茄',calories:18,category:'vegetable'},
+  {id:'f24',name:'黄瓜',calories:15,category:'vegetable'},{id:'f25',name:'生菜',calories:15,category:'vegetable'},
+  {id:'f26',name:'茄子',calories:25,category:'vegetable'},{id:'f27',name:'彩椒',calories:31,category:'vegetable'},
+  {id:'f30',name:'苹果',calories:52,category:'fruit'},{id:'f31',name:'香蕉',calories:89,category:'fruit'},
+  {id:'f32',name:'蓝莓',calories:57,category:'fruit'},{id:'f33',name:'橙子',calories:47,category:'fruit'},
+  {id:'f34',name:'猕猴桃',calories:61,category:'fruit'},{id:'f35',name:'牛油果',calories:160,category:'fruit'},
+  {id:'f40',name:'牛奶',calories:42,category:'dairy'},{id:'f41',name:'酸奶',calories:59,category:'dairy'},
+  {id:'f42',name:'希腊酸奶',calories:97,category:'dairy'},{id:'f43',name:'奶酪',calories:402,category:'dairy'},
+  {id:'f50',name:'杏仁',calories:579,category:'other'},{id:'f51',name:'核桃',calories:654,category:'other'},
+  {id:'f52',name:'花生',calories:567,category:'other'}
+];
+
+const RECIPE_DATABASE = [
+  {id:'r1',name:'鸡胸肉沙拉',description:'高蛋白低脂肪的健康沙拉，适合减脂期间食用',calories:320,protein:35,carbs:15,fat:12,tags:['高蛋白','低脂','沙拉'],mealType:'lunch',cookTime:20,ingredients:['鸡胸肉 150g','生菜 100g','小番茄 50g','黄瓜 50g','橄榄油 5ml','柠檬汁 10ml'],steps:['鸡胸肉煎熟切块','蔬菜洗净切块','混合所有食材','淋上橄榄油和柠檬汁']},
+  {id:'r2',name:'燕麦蓝莓碗',description:'营养丰富的早餐选择，富含膳食纤维',calories:280,protein:12,carbs:42,fat:8,tags:['早餐','高纤维','水果'],mealType:'breakfast',cookTime:15,ingredients:['燕麦 50g','蓝莓 50g','牛奶 200ml','蜂蜜 10g','坚果 10g'],steps:['燕麦加入牛奶煮至浓稠','倒入碗中','撒上蓝莓和坚果','淋上蜂蜜']},
+  {id:'r3',name:'三文鱼意面',description:'富含omega-3的美味意面',calories:450,protein:28,carbs:45,fat:18,tags:['高蛋白','晚餐','意面'],mealType:'dinner',cookTime:30,ingredients:['三文鱼 100g','意面 100g','菠菜 50g','蒜 2瓣','橄榄油 10ml','柠檬汁 5ml'],steps:['意面煮熟','三文鱼煎熟','炒香蒜末和菠菜','混合所有食材','调味后装盘']},
+  {id:'r4',name:'希腊酸奶水果杯',description:'健康又美味的下午茶选择',calories:180,protein:15,carbs:20,fat:6,tags:['小吃','水果','低卡'],mealType:'snack',cookTime:5,ingredients:['希腊酸奶 150g','草莓 50g','蓝莓 30g','蜂蜜 5g','格兰诺拉麦片 20g'],steps:['酸奶倒入杯中','铺上水果','撒上麦片','淋上蜂蜜']},
+  {id:'r5',name:'西兰花炒牛肉',description:'高蛋白增肌餐，适合健身人群',calories:380,protein:38,carbs:12,fat:20,tags:['高蛋白','增肌','晚餐'],mealType:'dinner',cookTime:25,ingredients:['牛肉 150g','西兰花 200g','蒜 3瓣','生抽 15ml','蚝油 10ml'],steps:['牛肉切片腌制','西兰花焯水','爆香蒜末','炒牛肉至变色','加入西兰花和调味料']},
+  {id:'r6',name:'全麦三明治',description:'方便快捷的健康早餐',calories:320,protein:18,carbs:35,fat:12,tags:['早餐','快速','全麦'],mealType:'breakfast',cookTime:10,ingredients:['全麦面包 2片','鸡蛋 1个','生菜 2片','番茄 2片','牛油果 1/4个'],steps:['鸡蛋煎熟','面包烤脆','组装三明治','切半装盘']},
+  {id:'r7',name:'紫薯鸡蛋饼',description:'富含膳食纤维和蛋白质的早餐',calories:250,protein:14,carbs:32,fat:8,tags:['早餐','紫薯','高纤维'],mealType:'breakfast',cookTime:20,ingredients:['紫薯 100g','鸡蛋 2个','牛奶 50ml','面粉 30g'],steps:['紫薯蒸熟压泥','混合鸡蛋和牛奶','加入面粉搅匀','小火煎至两面金黄']},
+  {id:'r8',name:'虾仁炒彩椒',description:'低脂高蛋白的健康菜品',calories:220,protein:28,carbs:10,fat:8,tags:['低脂','高蛋白','快手菜'],mealType:'lunch',cookTime:15,ingredients:['虾仁 200g','彩椒 200g','蒜 2瓣','盐适量','黑胡椒适量'],steps:['虾仁洗净腌制','彩椒切块','炒熟虾仁','加入彩椒快炒','调味装盘']},
+  {id:'r9',name:'小米南瓜粥',description:'养胃暖身的传统粥品',calories:120,protein:3,carbs:25,fat:1,tags:['养胃','低卡','传统'],mealType:'breakfast',cookTime:40,ingredients:['小米 50g','南瓜 100g','红枣 3颗','水适量'],steps:['小米洗净浸泡','南瓜切块','所有食材放入锅中','大火煮开后转小火','煮至浓稠']},
+  {id:'r10',name:'番茄鸡蛋面',description:'经典家常面食，酸甜可口',calories:350,protein:15,carbs:52,fat:8,tags:['面食','家常','简单'],mealType:'lunch',cookTime:20,ingredients:['面条 100g','鸡蛋 2个','番茄 200g','葱适量','盐适量'],steps:['番茄切块','鸡蛋炒散','番茄炒出汁','加水煮面','混合装碗']}
+];
+
+// ============ HTML 渲染工具 ============
+function h(tag, attrs, ...children) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const k in attrs) {
+      if (k === 'class') el.className = attrs[k];
+      else if (k === 'style' && typeof attrs[k] === 'object') Object.assign(el.style, attrs[k]);
+      else if (k.startsWith('on') && typeof attrs[k] === 'function') {
+        el.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+      } else if (k === 'value') el.value = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+  }
+  children.flat().forEach(c => {
+    if (c == null || c === false) return;
+    el.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+  });
+  return el;
+}
+
+// ============ 业务操作 ============
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+function getTodayRecords() {
+  const today = getToday();
+  return STATE.records.filter(r => r.date === today);
+}
+function getMealRecord(mealType) {
+  return getTodayRecords().find(r => r.mealType === mealType);
+}
+function addFoodToMeal(mealType, food) {
+  const newFood = { foodId: food.id, name: food.name, portion: 100, calories: food.calories };
+  const existing = getMealRecord(mealType);
+  if (existing) {
+    existing.foods.push(newFood);
+    existing.totalCalories += food.calories;
+  } else {
+    STATE.records.push({
+      id: getToday() + '-' + mealType + '-' + Date.now(),
+      date: getToday(), mealType, foods: [newFood], totalCalories: food.calories
+    });
+  }
+  saveRecords();
+  render();
+}
+function removeFoodFromMeal(mealType, index) {
+  const rec = getMealRecord(mealType);
+  if (!rec) return;
+  const removed = rec.foods[index];
+  rec.foods.splice(index, 1);
+  rec.totalCalories -= removed.calories;
+  if (rec.foods.length === 0) {
+    STATE.records = STATE.records.filter(r => r.id !== rec.id);
+  }
+  saveRecords();
+  render();
+}
+
+function startApp() {
+  STATE.isSetup = true;
+  saveSetup();
+  render();
+}
+
+function switchTab(tab) {
+  STATE.activeTab = tab;
+  STATE.selectedRecipe = null;
+  render();
+}
+
+function startEdit() {
+  STATE.editingProfile = JSON.parse(JSON.stringify(STATE.profile));
+  STATE.isEditing = true;
+  render();
+}
+function cancelEdit() {
+  STATE.editingProfile = null;
+  STATE.isEditing = false;
+  render();
+}
+function saveEdit() {
+  STATE.profile = STATE.editingProfile;
+  STATE.editingProfile = null;
+  STATE.isEditing = false;
+  saveProfile();
+  render();
+}
+
+function openPicker(mealType) {
+  STATE.pickerOpen = mealType;
+  STATE.searchQuery = '';
+  render();
+}
+function closePicker() {
+  STATE.pickerOpen = null;
+  render();
+}
+
+function openRecipe(recipe) {
+  STATE.selectedRecipe = recipe;
+  render();
+}
+function closeRecipe() {
+  STATE.selectedRecipe = null;
+  render();
+}
+
+// ============ 页面渲染 ============
+function render() {
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  if (!STATE.isSetup) {
+    root.appendChild(renderWelcome());
+  } else {
+    if (STATE.activeTab === 'profile') root.appendChild(renderProfile());
+    else if (STATE.activeTab === 'intake') root.appendChild(renderIntake());
+    else if (STATE.activeTab === 'analysis') root.appendChild(renderAnalysis());
+    else if (STATE.activeTab === 'recipes') root.appendChild(renderRecipes());
+    root.appendChild(renderNav());
+    if (STATE.pickerOpen) root.appendChild(renderPicker());
+  }
+}
+
+function renderWelcome() {
+  const wrap = h('div', {class:'welcome'});
+  wrap.appendChild(h('div', {class:'welcome-emoji'}, '🥗'));
+  wrap.appendChild(h('h1', {class:'welcome-title'}, '健康饮食管家'));
+  wrap.appendChild(h('p', {class:'welcome-desc'},
+    '智能管理你的每日营养摄入', h('br'),
+    '基于个人数据推荐健康食谱'));
+  const features = h('div', {class:'welcome-features'});
+  [
+    ['📊','科学计算每日热量需求'],
+    ['🍱','分早中晚记录饮食'],
+    ['🤖','智能分析饮食偏好'],
+    ['📖','推荐专属健康食谱']
+  ].forEach(([icon,text]) => {
+    const f = h('div', {class:'welcome-feature'});
+    f.appendChild(h('span', {class:'welcome-feature-icon'}, icon));
+    f.appendChild(h('span', {class:'welcome-feature-text'}, text));
+    features.appendChild(f);
+  });
+  wrap.appendChild(features);
+  const btn = h('button', {class:'btn btn-primary', onclick: startApp}, '开始使用');
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function renderNav() {
+  const nav = h('nav', {class:'nav'});
+  const tabs = h('div', {class:'nav-tabs'});
+  [
+    ['profile','👤','资料'],
+    ['intake','🥗','饮食'],
+    ['analysis','📊','分析'],
+    ['recipes','📚','食谱']
+  ].forEach(([id,icon,label]) => {
+    const tab = h('button', {
+      class: 'nav-tab' + (STATE.activeTab === id ? ' active' : ''),
+      onclick: () => switchTab(id)
+    });
+    tab.appendChild(h('div', null, icon));
+    tab.appendChild(h('div', null, label));
+    tabs.appendChild(tab);
+  });
+  nav.appendChild(tabs);
+  return nav;
+}
+
+function renderProfile() {
+  const p = STATE.profile;
+  const editing = STATE.isEditing;
+  const ep = STATE.editingProfile || p;
+  const wrap = h('div', {class:'page'});
+  wrap.appendChild(h('h1', {class:'page-title'}, '个人资料'));
+  wrap.appendChild(h('p', {class:'page-subtitle'}, '基于你的身体数据，科学计算每日热量需求'));
+
+  if (!editing) {
+    const bmr = Math.round(calculateBMR(p));
+    const tdee = calculateTDEE(p);
+    const target = calculateTargetCalories(p);
+    const c = h('div', {class:'card', style:{textAlign:'center'}});
+    c.appendChild(h('div', {style:{fontSize:14,color:'var(--text-light)',marginBottom:8}}, '每日目标热量'));
+    c.appendChild(h('div', {style:{fontSize:48,fontWeight:700,color:'var(--primary)'}}, String(target)));
+    c.appendChild(h('div', {style:{fontSize:14,color:'var(--text-light)'}}, '千卡/天'));
+    wrap.appendChild(c);
+
+    const grid = h('div', {class:'stat-grid'});
+    [{icon:'🔥',val:bmr,label:'基础代谢 (BMR)'},{icon:'⚡',val:tdee,label:'每日总消耗 (TDEE)'}].forEach(s => {
+      const sc = h('div', {class:'stat-card'});
+      sc.appendChild(h('div', {style:{fontSize:24}}, s.icon));
+      sc.appendChild(h('div', {class:'stat-value'}, String(s.val)));
+      sc.appendChild(h('div', {class:'stat-label'}, s.label));
+      grid.appendChild(sc);
+    });
+    wrap.appendChild(grid);
+
+    const card = h('div', {class:'card'});
+    card.appendChild(h('div', {class:'card-title'}, '基本信息'));
+    const ACTIVITY_LABELS = {sedentary:'久坐不动',light:'轻度活动',moderate:'中度活动',active:'高度活动','very-active':'极高活动'};
+    const GOAL_LABELS = {lose:'减重',maintain:'保持',gain:'增重'};
+    [
+      ['身高', p.height + ' cm'],
+      ['体重', p.weight + ' kg'],
+      ['年龄', p.age + ' 岁'],
+      ['性别', p.gender === 'male' ? '男' : '女'],
+      ['活动量', ACTIVITY_LABELS[p.activityLevel]],
+      ['目标', GOAL_LABELS[p.goal]]
+    ].forEach(([k,v]) => {
+      const item = h('div', {class:'preference-item'});
+      item.appendChild(h('span', {style:{color:'var(--text-light)'}}, k));
+      item.appendChild(h('span', {style:{fontWeight:600}}, v));
+      card.appendChild(item);
+    });
+    wrap.appendChild(card);
+
+    const btn = h('button', {class:'btn btn-primary', onclick: startEdit}, '✏️ 编辑资料');
+    wrap.appendChild(btn);
+  } else {
+    const card1 = h('div', {class:'card'});
+    card1.appendChild(h('div', {class:'card-title'}, '身体数据'));
+    [['身高 (cm)','height'],['体重 (kg)','weight'],['年龄','age']].forEach(([label,key]) => {
+      const fg = h('div', {class:'form-group'});
+      fg.appendChild(h('label', {class:'form-label'}, label));
+      const input = h('input', {type:'number', class:'form-input', value: ep[key], step: key === 'weight' ? '0.1' : '1'});
+      input.addEventListener('input', e => { ep[key] = Number(e.target.value); });
+      fg.appendChild(input);
+      card1.appendChild(fg);
+    });
+    const fg = h('div', {class:'form-group'});
+    fg.appendChild(h('label', {class:'form-label'}, '性别'));
+    const opt = h('div', {class:'option-group', style:{gridTemplateColumns:'1fr 1fr'}});
+    [['male','男'],['female','女']].forEach(([v,l]) => {
+      const o = h('div', {class:'option' + (ep.gender === v ? ' active' : '')}, l);
+      o.addEventListener('click', () => { ep.gender = v; render(); });
+      opt.appendChild(o);
+    });
+    fg.appendChild(opt);
+    card1.appendChild(fg);
+    wrap.appendChild(card1);
+
+    const card2 = h('div', {class:'card'});
+    card2.appendChild(h('div', {class:'card-title'}, '活动量'));
+    [
+      ['sedentary','久坐不动','办公室工作，几乎不运动'],
+      ['light','轻度活动','每周运动 1-3 次'],
+      ['moderate','中度活动','每周运动 3-5 次'],
+      ['active','高度活动','每周运动 6-7 次'],
+      ['very-active','极高活动','运动员级别']
+    ].forEach(([v,l,d]) => {
+      const o = h('div', {class:'option' + (ep.activityLevel === v ? ' active' : ''), style:{textAlign:'left'}});
+      o.appendChild(h('div', {style:{fontWeight:600}}, l));
+      o.appendChild(h('div', {style:{fontSize:12,opacity:0.8,marginTop:2}}, d));
+      o.addEventListener('click', () => { ep.activityLevel = v; render(); });
+      card2.appendChild(o);
+    });
+    wrap.appendChild(card2);
+
+    const card3 = h('div', {class:'card'});
+    card3.appendChild(h('div', {class:'card-title'}, '目标'));
+    const opt3 = h('div', {class:'option-group'});
+    [['lose','减重','📉'],['maintain','保持','⚖️'],['gain','增重','📈']].forEach(([v,l,e]) => {
+      const o = h('div', {class:'option' + (ep.goal === v ? ' active' : '')});
+      o.appendChild(h('div', {style:{fontSize:24,marginBottom:4}}, e));
+      o.appendChild(document.createTextNode(l));
+      o.addEventListener('click', () => { ep.goal = v; render(); });
+      opt3.appendChild(o);
+    });
+    card3.appendChild(opt3);
+    wrap.appendChild(card3);
+
+    const btns = h('div', {style:{display:'flex',gap:8}});
+    const cancel = h('button', {class:'btn btn-outline', onclick: cancelEdit}, '取消');
+    const save = h('button', {class:'btn btn-primary', onclick: saveEdit}, '保存');
+    btns.appendChild(cancel);
+    btns.appendChild(save);
+    wrap.appendChild(btns);
+  }
+  return wrap;
+}
+
+function renderIntake() {
+  const target = calculateTargetCalories(STATE.profile);
+  const today = getToday();
+  const records = getTodayRecords();
+  const total = records.reduce((s,r) => s + r.totalCalories, 0);
+  const remaining = target - total;
+  const percent = Math.min(100, (total / target) * 100);
+
+  const wrap = h('div', {class:'page'});
+  wrap.appendChild(h('h1', {class:'page-title'}, '今日饮食'));
+  wrap.appendChild(h('p', {class:'page-subtitle'}, today));
+
+  const card = h('div', {class:'card'});
+  const ring = h('div', {class:'ring-progress'});
+  const radius = 70;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (percent/100) * circ;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.innerHTML = '<circle cx="90" cy="90" r="' + radius + '" fill="none" stroke="#e5e7eb" stroke-width="12"/>' +
+    '<circle cx="90" cy="90" r="' + radius + '" fill="none" stroke="' + (percent > 100 ? '#ef4444' : '#10b981') +
+    '" stroke-width="12" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" stroke-linecap="round"/>';
+  ring.appendChild(svg);
+  const text = h('div', {class:'ring-progress-text'});
+  text.appendChild(h('div', {class:'ring-progress-value'}, String(total)));
+  text.appendChild(h('div', {class:'ring-progress-label'}, '/ ' + target + ' 千卡'));
+  const remainText = h('div', {class:'ring-progress-label', style:{marginTop:8,color: remaining >= 0 ? 'var(--primary)' : 'var(--danger)'}}, '剩余 ' + remaining + ' 千卡');
+  text.appendChild(remainText);
+  ring.appendChild(text);
+  card.appendChild(ring);
+  wrap.appendChild(card);
+
+  const meals = [
+    {type:'breakfast', label:'早餐', emoji:'🌅'},
+    {type:'lunch', label:'午餐', emoji:'☀️'},
+    {type:'dinner', label:'晚餐', emoji:'🌙'}
+  ];
+  meals.forEach(m => {
+    const section = h('div', {class:'meal-section'});
+    const header = h('div', {class:'meal-header'});
+    const title = h('div', {class:'meal-title'});
+    title.appendChild(h('span', {class:'meal-emoji'}, m.emoji));
+    title.appendChild(document.createTextNode(m.label));
+    header.appendChild(title);
+    const rec = getMealRecord(m.type);
+    header.appendChild(h('div', {class:'meal-calories'}, (rec ? rec.totalCalories : 0) + ' 千卡'));
+    section.appendChild(header);
+
+    if (rec && rec.foods.length) {
+      const list = h('div', {class:'food-list'});
+      rec.foods.forEach((f, i) => {
+        const item = h('div', {class:'food-item'});
+        const info = h('div');
+        info.appendChild(h('div', {class:'food-name'}, f.name));
+        info.appendChild(h('div', {class:'food-portion'}, f.portion + 'g'));
+        item.appendChild(info);
+        const right = h('div', {style:{display:'flex',alignItems:'center',gap:8}});
+        right.appendChild(h('span', {class:'food-calories'}, f.calories + ' 千卡'));
+        const rm = h('button', {class:'food-remove'}, '✕');
+        rm.addEventListener('click', () => removeFoodFromMeal(m.type, i));
+        right.appendChild(rm);
+        item.appendChild(right);
+        list.appendChild(item);
+      });
+      section.appendChild(list);
+    } else {
+      section.appendChild(h('div', {class:'empty-meal'}, '还没有添加食物'));
+    }
+    const btn = h('button', {class:'btn btn-secondary', style:{width:'100%',marginTop:12}}, '+ 添加食物');
+    btn.addEventListener('click', () => openPicker(m.type));
+    section.appendChild(btn);
+    wrap.appendChild(section);
+  });
+  return wrap;
+}
+
+function renderPicker() {
+  const overlay = h('div', {class:'modal-overlay'});
+  overlay.addEventListener('click', closePicker);
+  const modal = h('div', {class:'modal'});
+  modal.addEventListener('click', e => e.stopPropagation());
+  const header = h('div', {class:'modal-header'});
+  const mLabel = {breakfast:'早餐',lunch:'午餐',dinner:'晚餐'};
+  header.appendChild(h('div', {class:'modal-title'}, '添加食物到' + mLabel[STATE.pickerOpen]));
+  const close = h('button', {class:'modal-close'}, '×');
+  close.addEventListener('click', closePicker);
+  header.appendChild(close);
+  modal.appendChild(header);
+
+  const search = h('div', {class:'search'});
+  search.appendChild(h('span', {class:'search-icon'}, '🔍'));
+  const input = h('input', {type:'text', placeholder:'搜索食物...', value: STATE.searchQuery});
+  input.addEventListener('input', e => {
+    STATE.searchQuery = e.target.value;
+    const list = modal.querySelector('.food-picker');
+    list.innerHTML = '';
+    renderFoodPickerItems(list);
+  });
+  search.appendChild(input);
+  modal.appendChild(search);
+
+  const picker = h('div', {class:'food-picker'});
+  renderFoodPickerItems(picker);
+  modal.appendChild(picker);
+  overlay.appendChild(modal);
+  return overlay;
+}
+
+function renderFoodPickerItems(container) {
+  const filtered = FOOD_DATABASE.filter(f => f.name.includes(STATE.searchQuery));
+  if (!filtered.length) {
+    container.appendChild(h('div', {style:{textAlign:'center',padding:20,color:'var(--text-light)'}}, '没有找到相关食物'));
+    return;
+  }
+  filtered.forEach(food => {
+    const item = h('div', {class:'food-picker-item'});
+    item.addEventListener('click', () => {
+      addFoodToMeal(STATE.pickerOpen, food);
+      closePicker();
+    });
+    const info = h('div', {class:'food-picker-info'});
+    info.appendChild(h('div', {class:'food-picker-name'}, food.name));
+    item.appendChild(info);
+    item.appendChild(h('div', {class:'food-calories'}, food.calories + ' 千卡/100g'));
+    container.appendChild(item);
+  });
+}
+
+function renderAnalysis() {
+  const wrap = h('div', {class:'page'});
+  wrap.appendChild(h('h1', {class:'page-title'}, '数据分析'));
+  if (!STATE.records.length) {
+    wrap.appendChild(h('p', {class:'page-subtitle'}, '暂无数据，开始记录后自动生成分析'));
+    const empty = h('div', {class:'empty'});
+    empty.appendChild(h('div', {class:'empty-emoji'}, '📊'));
+    empty.appendChild(h('div', {class:'empty-text'}, '暂无数据', h('br'), '开始记录饮食后，将自动生成分析报告'));
+    wrap.appendChild(empty);
+    return wrap;
+  }
+  wrap.appendChild(h('p', {class:'page-subtitle'}, '共记录了 ' + STATE.records.length + ' 天的饮食数据'));
+
+  const pref = analyzePreference(STATE.records);
+  const target = calculateTargetCalories(STATE.profile);
+
+  // 7日趋势
+  const card1 = h('div', {class:'card'});
+  card1.appendChild(h('div', {class:'card-title'}, '近7日热量趋势'));
+  const chart = h('div', {style:{display:'flex',alignItems:'flex-end',gap:4,height:120,marginTop:12}});
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const dayRecs = STATE.records.filter(r => r.date === dateStr);
+    const cal = dayRecs.reduce((s,r) => s + r.totalCalories, 0);
+    days.push({date:dateStr, cal});
+  }
+  days.forEach(d => {
+    const col = h('div', {style:{flex:1,textAlign:'center'}});
+    const height = d.cal > 0 ? Math.min(100, (d.cal/target)*100) : 0;
+    const bar = h('div', {style:{
+      height: Math.max(0,height) + '%',
+      minHeight: d.cal > 0 ? '8px' : 0,
+      background: d.cal > 0 ? (d.cal > target ? 'var(--danger)' : 'var(--primary)') : 'var(--border)',
+      borderRadius: '4px 4px 0 0',
+      transition:'height 0.3s'
+    }});
+    col.appendChild(bar);
+    const date = new Date(d.date);
+    col.appendChild(h('div', {style:{fontSize:10,color:'var(--text-light)',marginTop:6}},
+      (date.getMonth()+1) + '/' + date.getDate()));
+    chart.appendChild(col);
+  });
+  card1.appendChild(chart);
+  const legend = h('div', {style:{marginTop:8,display:'flex',alignItems:'center',gap:8,fontSize:12,color:'var(--text-light)'}});
+  legend.appendChild(h('div', {style:{display:'flex',alignItems:'center',gap:4}},
+    h('div', {style:{width:8,height:8,background:'var(--primary)',borderRadius:2}}),
+    '达标'));
+  legend.appendChild(h('div', {style:{display:'flex',alignItems:'center',gap:4}},
+    h('div', {style:{width:8,height:8,background:'var(--danger)',borderRadius:2}}),
+    '超标'));
+  card1.appendChild(legend);
+  wrap.appendChild(card1);
+
+  // 目标完成度
+  const card2 = h('div', {class:'card'});
+  card2.appendChild(h('div', {class:'card-title'}, '目标完成度'));
+  const grid = h('div', {class:'stat-grid'});
+  [{val:pref.averageCalories,label:'平均每日摄入'},{val:target,label:'每日目标'}].forEach(s => {
+    const sc = h('div', {class:'stat-card'});
+    sc.appendChild(h('div', {class:'stat-value'}, String(s.val)));
+    sc.appendChild(h('div', {class:'stat-label'}, s.label));
+    grid.appendChild(sc);
+  });
+  card2.appendChild(grid);
+  const bar = h('div', {class:'progress', style:{marginTop:12}});
+  const barInner = h('div', {
+    class: 'progress-bar' + (pref.averageCalories > target ? ' danger' : (pref.averageCalories > target*0.9 ? ' warning' : '')),
+    style: {width: Math.min(100, (pref.averageCalories/target)*100) + '%'}
+  });
+  bar.appendChild(barInner);
+  card2.appendChild(bar);
+  const status = pref.averageCalories >= target - 100 && pref.averageCalories <= target + 100
+    ? '✅ 摄入量符合目标'
+    : pref.averageCalories < target
+    ? '⚠️ 还需增加 ' + (target - pref.averageCalories) + ' 千卡'
+    : '⚠️ 超出 ' + (pref.averageCalories - target) + ' 千卡';
+  card2.appendChild(h('div', {style:{fontSize:13,color:'var(--text-light)',marginTop:8,textAlign:'center'}}, status));
+  wrap.appendChild(card2);
+
+  // 三餐分布
+  const card3 = h('div', {class:'card'});
+  card3.appendChild(h('div', {class:'card-title'}, '三餐分布'));
+  const dist = h('div', {style:{display:'flex',gap:12,marginTop:12}});
+  [['🌅','breakfast','早餐'],['☀️','lunch','午餐'],['🌙','dinner','晚餐']].forEach(([emoji,key,label]) => {
+    const col = h('div', {style:{flex:1,textAlign:'center'}});
+    col.appendChild(h('div', {style:{fontSize:28}}, emoji));
+    col.appendChild(h('div', {style:{fontSize:24,fontWeight:700,color:'var(--primary)',margin:'4px 0'}}, pref.mealDistribution[key] + '%'));
+    col.appendChild(h('div', {style:{fontSize:12,color:'var(--text-light)'}}, label));
+    dist.appendChild(col);
+  });
+  card3.appendChild(dist);
+  wrap.appendChild(card3);
+
+  // 常吃食物
+  if (pref.frequentFoods.length) {
+    const card4 = h('div', {class:'card'});
+    card4.appendChild(h('div', {class:'card-title'}, '常吃食物 TOP 10'));
+    pref.frequentFoods.forEach((f, i) => {
+      const item = h('div', {class:'preference-item'});
+      item.appendChild(h('div', {style:{
+        width:24,height:24,
+        background: i < 3 ? 'var(--primary)' : 'var(--border)',
+        color: i < 3 ? 'white' : 'var(--text)',
+        borderRadius:'50%',
+        display:'flex',alignItems:'center',justifyContent:'center',
+        fontSize:12,fontWeight:600
+      }}, String(i+1)));
+      item.appendChild(h('span', {style:{flex:1,marginLeft:12}}, f.name));
+      item.appendChild(h('span', {style:{color:'var(--text-light)',fontSize:13}}, f.count + ' 次'));
+      card4.appendChild(item);
+    });
+    wrap.appendChild(card4);
+  }
+
+  return wrap;
+}
+
+function renderRecipes() {
+  if (STATE.selectedRecipe) {
+    return renderRecipeDetail();
+  }
+  const wrap = h('div', {class:'page'});
+  wrap.appendChild(h('h1', {class:'page-title'}, '健康食谱'));
+  wrap.appendChild(h('p', {class:'page-subtitle'}, '基于你的数据推荐专属食谱'));
+
+  // Tab
+  const tabs = h('div', {style:{
+    display:'flex',background:'var(--card)',borderRadius:12,padding:4,marginBottom:16
+  }});
+  ['recommend','all'].forEach(id => {
+    const label = id === 'recommend' ? '🎯 为你推荐' : '📚 全部食谱';
+    const btn = h('button', {
+      style:{
+        flex:1,padding:'10px 0',
+        background: STATE.recipeTab === id ? 'var(--primary)' : 'transparent',
+        color: STATE.recipeTab === id ? 'white' : 'var(--text)',
+        border:'none',borderRadius:10,fontWeight:600,cursor:'pointer'
+      },
+      onclick: () => { STATE.recipeTab = id; render(); }
+    }, label);
+    tabs.appendChild(btn);
+  });
+  wrap.appendChild(tabs);
+
+  if (STATE.recipeTab === 'recommend') {
+    if (STATE.records.length < 7) {
+      const card = h('div', {class:'card', style:{textAlign:'center',padding:30}});
+      card.appendChild(h('div', {style:{fontSize:48,marginBottom:12}}, '📝'));
+      card.appendChild(h('div', {style:{fontSize:16,fontWeight:600,marginBottom:8}}, '继续记录饮食'));
+      card.appendChild(h('div', {style:{fontSize:14,color:'var(--text-light)',lineHeight:1.6}},
+        '至少记录 7 天饮食数据后', h('br'),
+        '系统将分析你的饮食偏好', h('br'),
+        '并推荐个性化健康食谱'));
+      card.appendChild(h('div', {style:{marginTop:16,fontSize:13,color:'var(--text-light)'}},
+        '当前已记录 ' + STATE.records.length + ' 天'));
+      wrap.appendChild(card);
+    } else {
+      const pref = analyzePreference(STATE.records);
+      const target = calculateTargetCalories(STATE.profile);
+      const recommendCard = h('div', {class:'card', style:{background:'var(--primary-light)'}});
+      const top = h('div', {style:{display:'flex',alignItems:'center',gap:12,marginBottom:12}});
+      top.appendChild(h('div', {style:{fontSize:32}}, '🤖'));
+      const tinfo = h('div');
+      tinfo.appendChild(h('div', {style:{fontWeight:600,marginBottom:4}}, '基于你的饮食习惯'));
+      tinfo.appendChild(h('div', {style:{fontSize:13,color:'var(--primary-dark)'}},
+        '你平均每天摄入 ' + pref.averageCalories + ' 千卡'));
+      top.appendChild(tinfo);
+      recommendCard.appendChild(top);
+      if (pref.frequentFoods.length) {
+        recommendCard.appendChild(h('div', {style:{fontSize:13,color:'var(--primary-dark)'}},
+          '常吃食物：' + pref.frequentFoods.slice(0,5).map(f => f.name).join('、')));
+      }
+      wrap.appendChild(recommendCard);
+
+      // 推荐前 5 个
+      const recs = [...RECIPE_DATABASE].sort((a,b) => {
+        const da = Math.abs(a.calories - target/3);
+        const db = Math.abs(b.calories - target/3);
+        return da - db;
+      }).slice(0, 5);
+      recs.forEach(r => wrap.appendChild(renderRecipeCard(r)));
+    }
+  } else {
+    // 全部食谱
+    const search = h('div', {class:'search'});
+    search.appendChild(h('span', {class:'search-icon'}, '🔍'));
+    const input = h('input', {type:'text', placeholder:'搜索食谱名称或标签...', value: STATE.searchQuery});
+    input.addEventListener('input', e => { STATE.searchQuery = e.target.value; render(); });
+    search.appendChild(input);
+    wrap.appendChild(search);
+
+    const filters = h('div', {style:{display:'flex',gap:8,marginBottom:16,overflowX:'auto'}});
+    [['all','全部'],['breakfast','🌅 早餐'],['lunch','☀️ 午餐'],['dinner','🌙 晚餐']].forEach(([v,l]) => {
+      const btn = h('button', {
+        class: 'btn btn-sm ' + (STATE.recipeFilter === v ? 'btn-primary' : 'btn-outline'),
+        onclick: () => { STATE.recipeFilter = v; render(); }
+      }, l);
+      filters.appendChild(btn);
+    });
+    wrap.appendChild(filters);
+
+    const filtered = RECIPE_DATABASE.filter(r => {
+      if (STATE.recipeFilter !== 'all' && r.mealType !== STATE.recipeFilter) return false;
+      if (STATE.searchQuery && !r.name.includes(STATE.searchQuery) && !r.tags.some(t => t.includes(STATE.searchQuery))) return false;
+      return true;
+    });
+    filtered.forEach(r => wrap.appendChild(renderRecipeCard(r)));
+  }
+  return wrap;
+}
+
+function renderRecipeCard(recipe) {
+  const card = h('div', {class:'recipe-card'});
+  card.addEventListener('click', () => openRecipe(recipe));
+  const img = h('div', {class:'recipe-image', style:{
+    display:'flex',alignItems:'center',justifyContent:'center',
+    fontSize:48,color:'var(--text-light)'
+  }}, '🍽️');
+  card.appendChild(img);
+  const content = h('div', {class:'recipe-content'});
+  content.appendChild(h('div', {class:'recipe-name'}, recipe.name));
+  content.appendChild(h('div', {class:'recipe-desc'}, recipe.description));
+  const tags = h('div', {class:'recipe-tags'});
+  recipe.tags.forEach(t => tags.appendChild(h('span', {class:'tag'}, t)));
+  content.appendChild(tags);
+  const stats = h('div', {class:'recipe-stats'});
+  [{val:recipe.calories,label:'千卡'},{val:recipe.protein+'g',label:'蛋白质'},{val:recipe.cookTime+'分钟',label:'制作时间'}].forEach(s => {
+    const sc = h('div', {class:'recipe-stat'});
+    sc.appendChild(h('div', {class:'recipe-stat-value'}, String(s.val)));
+    sc.appendChild(h('div', {class:'recipe-stat-label'}, s.label));
+    stats.appendChild(sc);
+  });
+  content.appendChild(stats);
+  card.appendChild(content);
+  return card;
+}
+
+function renderRecipeDetail() {
+  const r = STATE.selectedRecipe;
+  const wrap = h('div', {class:'page'});
+  const back = h('button', {class:'btn btn-secondary', style:{marginBottom:16}});
+  back.appendChild(document.createTextNode('← 返回食谱列表'));
+  back.addEventListener('click', closeRecipe);
+  wrap.appendChild(back);
+
+  const hero = h('div', {class:'recipe-detail-image', style:{
+    display:'flex',alignItems:'center',justifyContent:'center',fontSize:80
+  }}, '🍽️');
+  wrap.appendChild(hero);
+  wrap.appendChild(h('h2', {style:{fontSize:24,fontWeight:700}}, r.name));
+  wrap.appendChild(h('p', {style:{color:'var(--text-light)',marginTop:8,lineHeight:1.6}}, r.description));
+
+  const grid1 = h('div', {class:'stat-grid', style:{marginTop:16}});
+  [{val:r.calories,label:'热量 (千卡)'},{val:r.cookTime,label:'制作时间 (分钟)'}].forEach(s => {
+    const sc = h('div', {class:'stat-card'});
+    sc.appendChild(h('div', {class:'stat-value'}, String(s.val)));
+    sc.appendChild(h('div', {class:'stat-label'}, s.label));
+    grid1.appendChild(sc);
+  });
+  wrap.appendChild(grid1);
+
+  const grid2 = h('div', {class:'stat-grid'});
+  [{val:r.protein+'g',color:'var(--primary)'},{val:r.carbs+'g',color:'var(--accent)'}].forEach(s => {
+    const sc = h('div', {class:'stat-card'});
+    sc.appendChild(h('div', {style:{fontSize:16,fontWeight:700,color:s.color}}, s.val));
+    sc.appendChild(h('div', {class:'stat-label'}, s === grid2.children[0] ? '蛋白质' : '碳水'));
+    grid2.appendChild(sc);
+  });
+  wrap.appendChild(grid2);
+
+  const tagSection = h('div', {class:'recipe-detail-section'});
+  tagSection.appendChild(h('div', {class:'recipe-detail-section-title'}, '🏷️ 标签'));
+  const tags = h('div', {class:'recipe-tags', style:{marginTop:8}});
+  r.tags.forEach(t => tags.appendChild(h('span', {class:'tag'}, t)));
+  tagSection.appendChild(tags);
+  wrap.appendChild(tagSection);
+
+  const ingSection = h('div', {class:'recipe-detail-section'});
+  ingSection.appendChild(h('div', {class:'recipe-detail-section-title'}, '🥕 所需食材'));
+  const list = h('div', {class:'recipe-detail-list'});
+  r.ingredients.forEach(i => {
+    const item = h('div', {class:'recipe-detail-item'});
+    item.appendChild(h('span', null, '•'));
+    item.appendChild(document.createTextNode(i));
+    list.appendChild(item);
+  });
+  ingSection.appendChild(list);
+  wrap.appendChild(ingSection);
+
+  const stepSection = h('div', {class:'recipe-detail-section'});
+  stepSection.appendChild(h('div', {class:'recipe-detail-section-title'}, '👨‍🍳 制作步骤'));
+  r.steps.forEach((s, i) => {
+    const step = h('div', {class:'recipe-detail-step'});
+    step.appendChild(h('div', {class:'step-number'}, String(i+1)));
+    step.appendChild(h('div', null, s));
+    stepSection.appendChild(step);
+  });
+  wrap.appendChild(stepSection);
+
+  return wrap;
+}
+
+// ============ 启动 ============
+render();
+
+})();
+</script>
+</body>
+</html>
